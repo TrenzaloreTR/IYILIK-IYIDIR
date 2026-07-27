@@ -40,7 +40,29 @@
             border: none;
         }
 
-        /* Metin Kapsayıcısı Ayarları */
+        /* YENİ EKLENEN: Açılışta Görünen Yönlendirme Metni */
+        .intro-message {
+            margin-top: 20px;
+            padding: 0 20px;
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 400px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+            .intro-message p {
+                margin: 10px 0;
+            }
+
+            /* Açılış metni kaybolma efekti */
+            .intro-message.fade-out {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+
+        /* Asıl Mesaj Kapsayıcısı Ayarları */
         .message-container {
             max-width: 500px;
             width: 90%;
@@ -106,7 +128,7 @@
 </head>
 <body>
 
-    <!-- Video Alanı: iframe artık doğrudan HTML içinde. enablejsapi=1 parametresi çok önemli -->
+    <!-- Video Alanı -->
     <div class="video-container" id="videoWrapper">
         <iframe id="player"
                 src="https://www.youtube.com/embed/AhruZ9xavfQ?enablejsapi=1&rel=0&playsinline=1"
@@ -115,7 +137,14 @@
         </iframe>
     </div>
 
-    <!-- Video Bitince Çıkacak Mesaj Alanı -->
+    <!-- YENİ EKLENEN: Açılış Metni -->
+    <div class="intro-message" id="introMessage">
+        <p>Merhaba, lütfen bu videoyu sonuna kadar izleyin (sadece 3 dk)</p>
+        <p>Ve izledikten sonra ekrana çıkacak olan yazıyı 
+        <br /> okuyun lütfen.</p>
+    </div>
+
+    <!-- Video Bitince Çıkacak Asıl Mesaj Alanı -->
     <div class="message-container" id="messageBox">
         <p class="highlight-text">Merhaba, siz de bu videoda bahsedilen kişi gibi güzel sevap kazanmak ve bir öğrenciyi mutlu etmek ister misiniz ?</p>
         <p>Eğer isterseniz,<br>Detayları konuşmak ve iletişime geçmek için bana mail atabilirsiniz.</p>
@@ -126,7 +155,6 @@
     </div>
 
     <script>
-        // YouTube API'sini yüklüyoruz
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -134,7 +162,6 @@
 
         var player;
 
-        // API hazır olduğunda mevcut iframe'e bağlanıyoruz
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 events: {
@@ -153,14 +180,27 @@
         function triggerPostVideoActions() {
             const videoWrapper = document.getElementById('videoWrapper');
             const messageBox = document.getElementById('messageBox');
+            const introMessage = document.getElementById('introMessage');
 
-            videoWrapper.classList.add('shrink');
-            messageBox.classList.add('show');
+            // 1. Önce giriş metnini yumuşakça gizle
+            introMessage.classList.add('fade-out');
 
+            // CSS animasyonu (0.5 sn) bittikten sonra sayfada yer kaplamaması için tamamen kaldır
             setTimeout(() => {
-                messageBox.classList.add('fade-in');
-                messageBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 150);
+                introMessage.style.display = 'none';
+
+                // 2. Metin kalktıktan hemen sonra videoyu küçült
+                videoWrapper.classList.add('shrink');
+
+                // 3. Asıl mesajı göster
+                messageBox.classList.add('show');
+
+                setTimeout(() => {
+                    messageBox.classList.add('fade-in');
+                    messageBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+
+            }, 500); // 500ms bekleme süresi intro-message'ın CSS transition süresiyle aynıdır
         }
     </script>
 </body>
